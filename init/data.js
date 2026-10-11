@@ -437,26 +437,34 @@ const stayStyles = [
   },
 ];
 
-const generatedListings = destinations
-  .flatMap((destination, destinationIndex) =>
-    stayStyles.map((stayStyle, stayStyleIndex) => ({
-      title: `${stayStyle.title} in ${destination.location}`,
-      description: `${stayStyle.description} Make ${destination.location}, ${destination.country} your base for exploring the region.`,
-      image:
-        sampleListings[
-          (destinationIndex * stayStyles.length + stayStyleIndex) %
-            sampleListings.length
-        ].image,
-      price: stayStyle.price + destinationIndex * 75,
-      location: destination.location,
-      country: destination.country,
-      geometry: {
-        type: "Point",
-        coordinates: destination.coordinates,
-      },
-    })),
-  )
-  .slice(0, 71);
+const generatedListings = Array.from({ length: 971 }, (_, listingIndex) => {
+  const destinationIndex = listingIndex % destinations.length;
+  const stayStyleIndex =
+    Math.floor(listingIndex / destinations.length) % stayStyles.length;
+  const variation =
+    Math.floor(listingIndex / (destinations.length * stayStyles.length)) + 1;
+  const destination = destinations[destinationIndex];
+  const stayStyle = stayStyles[stayStyleIndex];
+
+  return {
+    title: `${stayStyle.title} in ${destination.location}${
+      variation > 1 ? ` - ${variation}` : ""
+    }`,
+    description: `${stayStyle.description} Make ${destination.location}, ${destination.country} your base for exploring the region.`,
+    image:
+      sampleListings[
+        (destinationIndex * stayStyles.length + stayStyleIndex) %
+          sampleListings.length
+      ].image,
+    price: stayStyle.price + destinationIndex * 75 + (variation - 1) * 50,
+    location: destination.location,
+    country: destination.country,
+    geometry: {
+      type: "Point",
+      coordinates: destination.coordinates,
+    },
+  };
+});
 
 const existingCoordinates = {
   Malibu: [-118.7798, 34.0259],
