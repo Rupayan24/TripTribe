@@ -14,7 +14,6 @@ const session = require("express-session");
 const connectMongo = require("connect-mongo");
 const MongoStore = connectMongo.default || connectMongo;
 
-
 const flash = require("connect-flash");
 
 const passport = require("passport");
@@ -26,8 +25,6 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 const dburl = process.env.ATLASDB_URL;
-
-
 
 async function main() {
   await mongoose.connect(dburl);
@@ -51,7 +48,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public")));
 
-
 const store = MongoStore.create({
   mongoUrl: dburl,
   touchAfter: 24 * 3600, // lazy session update (24 hours)
@@ -60,7 +56,6 @@ const store = MongoStore.create({
 store.on("error", (err) => {
   console.log("ERROR in MONGO SESSION STORE", err);
 });
-
 
 // Session & Flash Configuration (Must come before routes)
 const sessionOptions = {
@@ -95,9 +90,9 @@ app.use((req, res, next) => {
 });
 
 // Root Route (Now session-aware)
-//app.get("/", (req, res) => {
-//  res.send("Hi, I am root");
-//});
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 // Demo User Route
 /*
