@@ -349,4 +349,154 @@ const sampleListings = [
   },
 ];
 
-module.exports = { data: sampleListings };
+const destinations = [
+  { location: "Lisbon", country: "Portugal", coordinates: [-9.1393, 38.7223] },
+  { location: "Kyoto", country: "Japan", coordinates: [135.7681, 35.0116] },
+  {
+    location: "Reykjavik",
+    country: "Iceland",
+    coordinates: [-21.9426, 64.1466],
+  },
+  {
+    location: "Marrakech",
+    country: "Morocco",
+    coordinates: [-7.9811, 31.6295],
+  },
+  {
+    location: "Queenstown",
+    country: "New Zealand",
+    coordinates: [168.6626, -45.0312],
+  },
+  {
+    location: "Cape Town",
+    country: "South Africa",
+    coordinates: [18.4241, -33.9249],
+  },
+  { location: "Jaipur", country: "India", coordinates: [75.7873, 26.9124] },
+  {
+    location: "Vancouver",
+    country: "Canada",
+    coordinates: [-123.1207, 49.2827],
+  },
+  {
+    location: "Edinburgh",
+    country: "United Kingdom",
+    coordinates: [-3.1883, 55.9533],
+  },
+  { location: "Barcelona", country: "Spain", coordinates: [2.1734, 41.3851] },
+  {
+    location: "Mexico City",
+    country: "Mexico",
+    coordinates: [-99.1332, 19.4326],
+  },
+  { location: "Hanoi", country: "Vietnam", coordinates: [105.8342, 21.0278] },
+  { location: "Nairobi", country: "Kenya", coordinates: [36.8219, -1.2921] },
+  {
+    location: "Zanzibar",
+    country: "Tanzania",
+    coordinates: [39.2083, -6.1659],
+  },
+  { location: "Prague", country: "Czechia", coordinates: [14.4378, 50.0755] },
+  { location: "Santorini", country: "Greece", coordinates: [25.4615, 36.3932] },
+  {
+    location: "Seoul",
+    country: "South Korea",
+    coordinates: [126.978, 37.5665],
+  },
+  {
+    location: "Sydney",
+    country: "Australia",
+    coordinates: [151.2093, -33.8688],
+  },
+];
+
+const stayStyles = [
+  {
+    title: "Old Town Hideaway",
+    description:
+      "A thoughtfully furnished hideaway close to local cafes, landmarks, and neighborhood favorites.",
+    price: 950,
+  },
+  {
+    title: "Harbor View Apartment",
+    description:
+      "A bright, comfortable apartment with memorable views and easy access to the waterfront.",
+    price: 1450,
+  },
+  {
+    title: "Garden Courtyard Home",
+    description:
+      "A calm private home with an inviting outdoor space for slow mornings and relaxed evenings.",
+    price: 1850,
+  },
+  {
+    title: "Design District Loft",
+    description:
+      "A stylish loft with generous natural light, a practical layout, and independent local shops nearby.",
+    price: 2250,
+  },
+];
+
+const generatedListings = destinations
+  .flatMap((destination, destinationIndex) =>
+    stayStyles.map((stayStyle, stayStyleIndex) => ({
+      title: `${stayStyle.title} in ${destination.location}`,
+      description: `${stayStyle.description} Make ${destination.location}, ${destination.country} your base for exploring the region.`,
+      image:
+        sampleListings[
+          (destinationIndex * stayStyles.length + stayStyleIndex) %
+            sampleListings.length
+        ].image,
+      price: stayStyle.price + destinationIndex * 75,
+      location: destination.location,
+      country: destination.country,
+      geometry: {
+        type: "Point",
+        coordinates: destination.coordinates,
+      },
+    })),
+  )
+  .slice(0, 71);
+
+const existingCoordinates = {
+  Malibu: [-118.7798, 34.0259],
+  "New York City": [-74.006, 40.7128],
+  Aspen: [-106.8175, 39.1911],
+  Florence: [11.2558, 43.7696],
+  Portland: [-122.6784, 45.5152],
+  Cancun: [-86.8515, 21.1619],
+  "Lake Tahoe": [-120.0324, 39.0968],
+  "Los Angeles": [-118.2437, 34.0522],
+  Verbier: [7.2285, 46.0962],
+  "Serengeti National Park": [34.8333, -2.3333],
+  Amsterdam: [4.9041, 52.3676],
+  Fiji: [178.065, -17.7134],
+  Cotswolds: [-1.8433, 51.833],
+  Boston: [-71.0589, 42.3601],
+  Bali: [115.1889, -8.4095],
+  Banff: [-115.5708, 51.1784],
+  Miami: [-80.1918, 25.7617],
+  Phuket: [98.3381, 7.8804],
+  "Scottish Highlands": [-4.2026, 57.12],
+  Dubai: [55.2708, 25.2048],
+  Montana: [-110.3626, 45.677],
+  Mykonos: [25.3289, 37.4467],
+  "Costa Rica": [-84.0907, 9.7489],
+  Charleston: [-79.9311, 32.7765],
+  Tokyo: [139.6917, 35.6895],
+  "New Hampshire": [-71.5724, 43.1939],
+  Maldives: [73.2207, 3.2028],
+};
+
+const data = [
+  ...sampleListings.map((listing) => ({
+    ...listing,
+    geometry: {
+      type: "Point",
+      coordinates: existingCoordinates[listing.location] || [88.3639, 22.5726],
+    },
+  })),
+  ...generatedListings,
+];
+
+module.exports = { data };
