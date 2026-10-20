@@ -1,60 +1,50 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-  <div class="row mt-3">
-    <div class="col-8 offset-2">
-  <h3>Edit Your Listing</h3>
-  <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
-    
+
+<main class="site-container form-page">
+  <p class="eyebrow mb-0">Keep the details fresh</p>
+  <h1>Make it feel like you.</h1>
+  <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation form-card" enctype="multipart/form-data">
     <div class="mb-3">
-      <label for="title" class="form-label">Title</label>
-      <input name="listing[title]" value="<%= listing.title%>" type="text" class="form-control" required>
-      <div class="valid-feedback">The title looks good!</div>
-      <div class="invalid-feedback">Please enter a title</div>
+      <label for="title" class="form-label">Name of your place</label>
+      <input name="listing[title]" id="title" value="<%= listing.title %>" type="text" class="form-control" required>
+      <div class="invalid-feedback">Add a name for your place.</div>
     </div>
 
     <div class="mb-3">
       <label for="description" class="form-label">Description</label>
-      <textarea name="listing[description]" class="form-control" required><%= listing.description%></textarea>
-      <div class="invalid-feedback">Please enter a short description</div>
+      <textarea name="listing[description]" id="description" class="form-control" required><%= listing.description %></textarea>
+      <div class="invalid-feedback">Add a short description.</div>
     </div>
 
     <div class="mb-3">
-      <label for="original-image" class="form-label">Original Image</label>
-      <img src="<%= originalImageUrl %>" alt="" class="edit-img">
+      <label for="original-image" class="form-label">Current photo</label>
+      <div><img src="<%= originalImageUrl %>" alt="Current photo of <%= listing.title %>" class="edit-img"></div>
     </div>
-
 
     <div class="mb-3">
-      <label for="image" class="form-label">Upload New Image</label>
-      <input  name="listing[image]" placeholder="enter image URL/link" type="file" class="form-control">
+      <label for="image" class="form-label">Replace the photo (optional)</label>
+      <input name="listing[image]" id="image" type="file" class="form-control" accept="image/*">
     </div>
-
 
     <div class="row">
       <div class="mb-3 col-md-4">
-      <label for="price" class="form-label">Price</label>
-      <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required>
-      <div class="invalid-feedback">Price should be valid</div>
-    </div>
-    
-
-    <div class="mb-3 col-md-8">
-      <label for="country" class="form-label">Country</label>
-      <input name="listing[country]" value="<%= listing.country%>"  type="text" class="form-control" required>
-      <div class="invalid-feedback">Country name should be valid</div>
-    </div>
+        <label for="price" class="form-label">Price per night (₹)</label>
+        <input name="listing[price]" id="price" value="<%= listing.price %>" type="number" min="0" class="form-control" required>
+        <div class="invalid-feedback">Enter a valid nightly price.</div>
+      </div>
+      <div class="mb-3 col-md-8">
+        <label for="country" class="form-label">Country</label>
+        <input name="listing[country]" id="country" value="<%= listing.country %>" type="text" class="form-control" required>
+        <div class="invalid-feedback">Add the country.</div>
+      </div>
     </div>
 
-
-    <div class="mb-3">
+    <div class="mb-4">
       <label for="location" class="form-label">Location</label>
-      <input name="listing[location]" value="<%= listing.location%>" type="text" class="form-control" required>
-      <div class="invalid-feedback">Location should be valid</div>
+      <input name="listing[location]" id="location" value="<%= listing.location %>" type="text" class="form-control" required>
+      <div class="invalid-feedback">Add a town, city, or region.</div>
     </div>
 
-    <button class="btn btn-dark edit-btn mt-3">Edit</button>
-    <br><br>
+    <button class="btn btn-dark edit-btn px-4 py-2" type="submit">Save changes</button>
   </form>
-  </div>
-  </div>
-</body>
+</main>

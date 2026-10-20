@@ -1,30 +1,30 @@
 <% layout("/layouts/boilerplate") %>
 
-  <div class="row mt-3">
-  <h1 class="col-6 offset-3">SignUp on Wanderlust</h1>
-  <div class="col-6 offset-3">
-    <form action="/signup" method="POST" class="needs-validation" novalidate>
-      <div class="mb-3">
+<main class="site-container form-page">
+  <p class="eyebrow mb-0">A little more room for adventure</p>
+  <h1>Come on in.</h1>
+  <form action="/signup" method="POST" class="needs-validation form-card" novalidate>
+    <div class="mb-3">
       <label for="username" class="form-label">Username</label>
-      <input name="username" id="username" type="text" class="form-control" required>
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Enter a valid username</div>
-      </div>
-
-      <div class="mb-3">
-      <label for="email" class="form-label">Email</label>
-      <input name="email" id="email" type="email" class="form-control" required>
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Enter a valid email</div>
-      </div>
-
-      <div class="mb-3">
-      <label for="password" class="form-label">Password</label>
-      <input name="password" id="password" type="password" class="form-control" required>
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Enter a valid password</div>
+      <input name="username" id="username" type="text" class="form-control" autocomplete="username" required>
+      <div class="valid-feedback">Looks good.</div>
+      <div class="invalid-feedback">Choose a username to continue.</div>
     </div>
-    <button class="btn btn-success">SignUp</button>
-    </form>
-  </div>
-</div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input name="email" id="email" type="email" class="form-control" autocomplete="email" required>
+      <div class="valid-feedback">Looks good.</div>
+      <div class="invalid-feedback">Enter a valid email address.</div>
+    </div>
+
+    <div class="mb-4">
+      <label for="password" class="form-label">Password</label>
+      <input name="password" id="password" type="password" class="form-control" autocomplete="new-password" required>
+      <div class="valid-feedback">Looks good.</div>
+      <div class="invalid-feedback">Choose a password to continue.</div>
+    </div>
+    <button class="btn btn-dark px-4 py-2" type="submit">Create your account</button>
+    <p class="detail-location mt-3 mb-0">Already have an account? <a href="/login">Log in</a></p>
+  </form>
+</main>

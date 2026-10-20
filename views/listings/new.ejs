@@ -1,56 +1,47 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-  <div class="row mt-3">
-    <div class="col-8 offset-2">
-  <h3>Create a New Listing</h3>
-  <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
 
+<main class="site-container form-page">
+  <p class="eyebrow mb-0">A good stay starts here</p>
+  <h1>Share a place you love.</h1>
+  <form method="POST" action="/listings" novalidate class="needs-validation form-card" enctype="multipart/form-data">
     <div class="mb-3">
-      <label for="title" class="form-label">Title</label>
-      <input name="listing[title]" placeholder="Add a catchy title" type="text" class="form-control" required>
-      <div class="valid-feedback">The title looks good!</div>
-      <div class="invalid-feedback">Please enter a title</div>
-    </div>
-
-    
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea name="listing[description]" class="form-control" required></textarea>
-      <div class="invalid-feedback">Please enter a short description</div>
+      <label for="title" class="form-label">Give your place a name</label>
+      <input name="listing[title]" id="title" placeholder="A quiet cabin near the lake" type="text" class="form-control" required>
+      <div class="valid-feedback">The title looks good.</div>
+      <div class="invalid-feedback">Add a name for your place.</div>
     </div>
 
     <div class="mb-3">
-      <label for="image" class="form-label">Upload Listing Image</label>
-      <input  name="listing[image]" placeholder="enter image URL/link" type="file" class="form-control" required>
-      <div class="invalid-feedback">Please enter a Image of your Listing</div>
+      <label for="description" class="form-label">What makes it special?</label>
+      <textarea name="listing[description]" id="description" class="form-control" placeholder="Tell guests what a day here might feel like." required></textarea>
+      <div class="invalid-feedback">Add a short description.</div>
     </div>
 
-    
+    <div class="mb-3">
+      <label for="image" class="form-label">A photo guests will remember</label>
+      <input name="listing[image]" id="image" type="file" class="form-control" accept="image/*" required>
+      <div class="invalid-feedback">Choose a photo of your place.</div>
+    </div>
+
     <div class="row">
       <div class="mb-3 col-md-4">
-      <label for="price" class="form-label">Price</label>
-      <input name="listing[price]" placeholder="1200"  type="number" class="form-control" required>
-      <div class="invalid-feedback">Price should be valid</div>
+        <label for="price" class="form-label">Price per night (₹)</label>
+        <input name="listing[price]" id="price" placeholder="1200" type="number" min="0" class="form-control" required>
+        <div class="invalid-feedback">Enter a valid nightly price.</div>
+      </div>
+      <div class="mb-3 col-md-8">
+        <label for="country" class="form-label">Country</label>
+        <input name="listing[country]" id="country" placeholder="India" type="text" class="form-control" required>
+        <div class="invalid-feedback">Add the country.</div>
+      </div>
     </div>
-    
 
-    <div class="mb-3 col-md-8">
-      <label for="country" class="form-label">Country</label>
-      <input name="listing[country]" placeholder="India"  type="text" class="form-control" required>
-      <div class="invalid-feedback">Country name should be valid</div>
+    <div class="mb-4">
+      <label for="location" class="form-label">Where can guests find it?</label>
+      <input name="listing[location]" id="location" placeholder="Jaipur, Rajasthan" type="text" class="form-control" required>
+      <div class="invalid-feedback">Add a town, city, or region.</div>
     </div>
-    </div>
-    
-    
-    <div class="mb-3">
-      <label for="location" class="form-label">Location</label>
-      <input name="listing[location]" placeholder="Jaipur, Rajasthan" type="text" class="form-control" required>
-      <div class="invalid-feedback">Location should be valid</div>
-    </div>
-    
-    <button class="btn btn-dark add-btn mt-3">Add</button>
-    <br><br>
+
+    <button class="btn btn-dark add-btn px-4 py-2" type="submit">Publish your stay</button>
   </form>
-  </div>
-  </div>
-</body>
+</main>
