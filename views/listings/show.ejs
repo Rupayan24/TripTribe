@@ -34,9 +34,32 @@
       <p class="host-line">Hosted by <%= listing.owner ? listing.owner.username : "a TripTribe host" %></p>
       <p class="detail-description"><%= listing.description %></p>
     </div>
-    <aside class="price-card">
-      <p class="price"><strong>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %></strong> <small>per night</small></p>
-      <p class="detail-location mb-0">A good place to make a few memories.</p>
+    <aside>
+      <div class="price-card mb-3">
+        <p class="price"><strong>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %></strong> <small>per night</small></p>
+        <p class="detail-location mb-0">A good place to make a few memories.</p>
+      </div>
+
+      <!-- WEATHER WIDGET START -->
+      <% if (weather) { %>
+        <div class="card border-0 shadow-sm p-3 bg-light rounded-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <img src="<%= weather.iconUrl %>" alt="<%= weather.condition %>" style="width: 50px; height: 50px;">
+              <div class="ms-2">
+                <h4 class="mb-0 fw-bold"><%= weather.temp %>°C</h4>
+                <small class="text-capitalize text-muted"><%= weather.description %></small>
+              </div>
+            </div>
+            <div class="text-end text-muted small">
+              <div>Feels like: <strong><%= weather.feelsLike %>°C</strong></div>
+              <div>Humidity: <strong><%= weather.humidity %>%</strong></div>
+              <div>Wind: <strong><%= weather.windSpeed %> km/h</strong></div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      <!-- WEATHER WIDGET END -->
     </aside>
   </section>
 

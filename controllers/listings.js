@@ -2,6 +2,7 @@ const Listing = require("../models/listing");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
+const { getListingWeather } = require("../utils/weather.js");
 
 
 module.exports.index = async (req, res) => {
@@ -35,9 +36,14 @@ module.exports.showListing = async (req, res, next) => {
     req.flash("error", "Listing you requested for does not exist!");
     return res.redirect("/listings");
   }
-  console.log(listing);
+
+  let weather = null;
+  if (listing.geometry && listing.geometry.coordinates?.length === 2) {
+    const [lng, lat] = listing.geometry.coordinates;
+    weather = await getListingWeather(lng, lat);
+  }
   
-  res.render("listings/show.ejs", { listing });
+  res.render("listings/show.ejs", { listing, weather });
 };
 
 
