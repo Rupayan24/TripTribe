@@ -1,22 +1,33 @@
 <% layout("/layouts/boilerplate") %>
 
-<script id="listing-data" type="application/json"><%- JSON.stringify(listing) %></script>
+<% const user = (typeof currUser !== "undefined") ? currUser : null; %>
+<% const currentListing = (typeof listing !== "undefined" && listing) ? listing : {}; %>
+<% const reviews = Array.isArray(currentListing.reviews) ? currentListing.reviews : []; %>
+
+<script id="listing-data" type="application/json"><%- JSON.stringify({
+  listing: currentListing,
+  mapToken: (typeof process !== "undefined" && process.env.MAP_TOKEN) || "",
+}).replace(/</g, "\\u003c") %></script>
 <script>
-  const mapToken = "<%= process.env.MAP_TOKEN %>";
-  const listing = JSON.parse(document.getElementById("listing-data").textContent);
+  const listingPageData = JSON.parse(document.getElementById("listing-data").textContent);
+  const mapToken = listingPageData.mapToken;
+  const listing = listingPageData.listing;
 </script>
 
 <main class="site-container listing-detail">
   <header class="detail-heading">
     <div>
       <p class="eyebrow mb-0">A place to slow down</p>
-      <h1><%= listing.title %></h1>
-      <p class="detail-location mt-2"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i><%= listing.location %>, <%= listing.country %></p>
+      <h1><%= currentListing.title || "Untitled Stay" %></h1>
+      <p class="detail-location mt-2">
+        <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>
+        <%= currentListing.location || "Unknown location" %><% if (currentListing.country) { %>, <%= currentListing.country %><% } %>
+      </p>
     </div>
-    <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
+    <% if (user && currentListing.owner && String(currentListing.owner._id || currentListing.owner) === String(user._id)) { %>
       <div class="detail-actions">
-        <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark btn-sm">Edit stay</a>
-        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+        <a href="/listings/<%= currentListing._id %>/edit" class="btn btn-outline-dark btn-sm">Edit stay</a>
+        <form method="POST" action="/listings/<%= currentListing._id %>?_method=DELETE">
           <button class="btn btn-dark btn-sm" type="submit">Delete</button>
         </form>
       </div>
@@ -24,30 +35,69 @@
   </header>
 
   <img
-    src="<%= listing.image?.url %>"
+    src="<%= (currentListing.image && currentListing.image.url) ? currentListing.image.url : '/images/default.jpg' %>"
     class="detail-image"
-    alt="<%= listing.title %>"
+    alt="<%= currentListing.title || 'Stay image' %>"
   >
 
   <section class="detail-layout">
     <div>
-      <p class="host-line">Hosted by <%= listing.owner ? listing.owner.username : "a TripTribe host" %></p>
-      <p class="detail-description"><%= listing.description %></p>
+      <p class="host-line">
+        Hosted by <%= (currentListing.owner && currentListing.owner.username) ? currentListing.owner.username : "a TripTribe host" %>
+      </p>
+      <p class="detail-description"><%= currentListing.description || "No description provided." %></p>
     </div>
+
     <aside>
       <div class="price-card mb-3">
-        <p class="price"><strong>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %></strong> <small>per night</small></p>
+        <p class="price">
+          <strong>₹<%= Number.isFinite(Number(currentListing.price)) ? Number(currentListing.price).toLocaleString("en-IN") : "N/A" %></strong>
+          <small>per night</small>
+        </p>
         <p class="detail-location mb-0">A good place to make a few memories.</p>
       </div>
 
-      <!-- WEATHER WIDGET START -->
-      <% if (weather) { %>
+      <div class="reservation-card mb-3">
+        <div class="reservation-heading">
+          <span class="reservation-icon" aria-hidden="true">
+            <i class="fa-regular fa-calendar-check"></i>
+          </span>
+          <div>
+            <h2>Reserve this stay</h2>
+            <p>Choose your dates to plan your getaway.</p>
+          </div>
+        </div>
+        <% if (!user) { %>
+          <a href="/login" class="btn btn-dark w-100 reservation-button">Log in to book dates</a>
+        <% } else if (currentListing.owner && String(currentListing.owner._id || currentListing.owner) === String(user._id)) { %>
+          <div class="alert alert-secondary py-2 small mb-0 text-center">You are the host of this property.</div>
+        <% } else { %>
+          <form id="reservation-form" action="/bookings/listings/<%= currentListing._id %>/book" method="POST" class="needs-validation reservation-form" data-nightly-price="<%= Number(currentListing.price) || 0 %>" novalidate>
+            <div class="reservation-field">
+              <label for="checkIn">Check-in</label>
+              <input type="date" class="form-control" id="checkIn" name="checkIn" required>
+              <div class="invalid-feedback">Choose a check-in date.</div>
+            </div>
+            <div class="reservation-field">
+              <label for="checkOut">Check-out</label>
+              <input type="date" class="form-control" id="checkOut" name="checkOut" required>
+              <div class="invalid-feedback">Choose a check-out date after check-in.</div>
+            </div>
+            <p id="reservation-estimate" class="reservation-estimate" aria-live="polite" hidden></p>
+            <button type="submit" class="btn btn-dark w-100 reservation-button">
+              Confirm booking <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+            </button>
+          </form>
+        <% } %>
+      </div>
+
+      <% if (typeof weather !== "undefined" && weather) { %>
         <div class="card border-0 shadow-sm p-3 theme-weather-card rounded-3">
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
               <img src="<%= weather.iconUrl %>" alt="<%= weather.condition %>" style="width: 50px; height: 50px;">
               <div class="ms-2">
-                <h4 class="mb-0 fw-bold"><%= weather.temp %>°C</h4>
+                <h2 class="h4 mb-0 fw-bold"><%= weather.temp %>°C</h2>
                 <small class="text-capitalize text-muted"><%= weather.description %></small>
               </div>
             </div>
@@ -59,20 +109,19 @@
           </div>
         </div>
       <% } %>
-      <!-- WEATHER WIDGET END -->
     </aside>
   </section>
 
   <section class="reviews-section" aria-labelledby="reviews-heading">
-    <% if(currUser) { %>
+    <% if (user) { %>
       <div class="review-form mb-4">
         <h2 class="section-heading" id="review-form-heading">Tell us how it felt</h2>
-        <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+        <form action="/listings/<%= currentListing._id %>/reviews" method="POST" novalidate class="needs-validation">
           <div class="mb-3">
-            <label for="rating" class="form-label">Your rating</label>
-            <fieldset class="starability-slot">
-              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-              <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+            <label class="form-label" id="rating-label">Your rating</label>
+            <fieldset class="starability-slot" aria-labelledby="rating-label">
+              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" aria-label="No rating." />
+              <input type="radio" id="first-rate1" name="review[rating]" value="1" required />
               <label for="first-rate1" title="Terrible">1 star</label>
               <input type="radio" id="first-rate2" name="review[rating]" value="2" />
               <label for="first-rate2" title="Not good">2 stars</label>
@@ -95,18 +144,18 @@
     <% } %>
 
     <h2 class="section-heading" id="reviews-heading">
-      <%= listing.reviews && listing.reviews.length ? "Notes from other guests" : "Guest notes" %>
+      <%= reviews.length > 0 ? "Notes from other guests" : "Guest notes" %>
     </h2>
-    <% if(listing.reviews && listing.reviews.length > 0) { %>
+    <% if (reviews.length > 0) { %>
       <div class="row g-3">
-        <% for(let review of listing.reviews) { %>
+        <% for (const review of reviews) { %>
           <div class="col-12 col-md-6">
             <article class="review-card">
-              <p class="review-author mb-1"><%= review.author ? review.author.username : "A guest" %></p>
+              <p class="review-author mb-1"><%= (review.author && review.author.username) ? review.author.username : "A guest" %></p>
               <p class="starability-result" data-rating="<%= review.rating %>"></p>
-              <p class="review-comment"><%= review.comment %></p>
-              <% if(currUser && review.author && review.author._id.equals(currUser._id)) { %>
-                <form class="mt-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+              <p class="review-comment"><%= review.comment || "" %></p>
+              <% if (user && review.author && String(review.author._id || review.author) === String(user._id)) { %>
+                <form class="mt-3" method="POST" action="/listings/<%= currentListing._id %>/reviews/<%= review._id %>?_method=DELETE">
                   <button class="btn btn-outline-dark btn-sm" type="submit">Remove your note</button>
                 </form>
               <% } %>
@@ -125,4 +174,55 @@
   </section>
 </main>
 
+<script>
+  (() => {
+    const form = document.getElementById("reservation-form");
+    if (!form) return;
+
+    const checkIn = document.getElementById("checkIn");
+    const checkOut = document.getElementById("checkOut");
+    const estimate = document.getElementById("reservation-estimate");
+    const nightlyPrice = Number(form.dataset.nightlyPrice) || 0;
+
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    checkIn.min = formatDate(today);
+
+    const updateEstimate = () => {
+      if (!checkIn.value) {
+        checkOut.min = formatDate(new Date(today.getTime() + 86400000));
+        estimate.hidden = true;
+        return;
+      }
+
+      const earliestCheckOut = new Date(`${checkIn.value}T00:00:00`);
+      earliestCheckOut.setDate(earliestCheckOut.getDate() + 1);
+      checkOut.min = formatDate(earliestCheckOut);
+
+      if (checkOut.value && checkOut.value <= checkIn.value) {
+        checkOut.value = "";
+      }
+
+      if (!checkOut.value) {
+        estimate.hidden = true;
+        return;
+      }
+
+      const nights = (Date.parse(`${checkOut.value}T00:00:00Z`) - Date.parse(`${checkIn.value}T00:00:00Z`)) / 86400000;
+      estimate.textContent = `${nights} night${nights === 1 ? "" : "s"} · ₹${(nights * nightlyPrice).toLocaleString("en-IN")} total`;
+      estimate.hidden = false;
+    };
+
+    checkIn.addEventListener("change", updateEstimate);
+    checkOut.addEventListener("change", updateEstimate);
+    updateEstimate();
+  })();
+</script>
 <script src="/js/map.js"></script>

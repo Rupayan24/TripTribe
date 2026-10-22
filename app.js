@@ -23,6 +23,7 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const bookingRouter = require("./routes/booking.js");
 
 const dburl = process.env.ATLASDB_URL;
 
@@ -64,7 +65,6 @@ const sessionOptions = {
   resave: false,
   saveUninitialized: true,
   cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   },
@@ -110,6 +110,7 @@ app.get("/demouser", async (req, res) => {
 // Resource Routers
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/bookings", bookingRouter);
 app.use("/", userRouter);
 
 // Express 4 Catch-all 404 Route

@@ -30,7 +30,7 @@ module.exports.isOwner = async (req, res, next) => {
     return res.redirect("/listings");
   }
 
-  if (!listing.owner.equals(res.locals.currUser._id)) {
+  if (!listing.owner || !listing.owner.equals(res.locals.currUser._id)) {
     req.flash("error", "You don't have permission to edit");
     return res.redirect(`/listings/${id}`);
   }
@@ -71,7 +71,7 @@ module.exports.isReviewAuthor = async (req, res, next) => {
     return res.redirect("/listings");
   }
 
-  if (!review.author.equals(res.locals.currUser._id)) {
+  if (!review.author || !review.author.equals(res.locals.currUser._id)) {
     req.flash("error", "You are not the author of this review");
     return res.redirect(`/listings/${id}`);
   }

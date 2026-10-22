@@ -1,0 +1,50 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+  <h2 class="mb-4">My Booked Trips</h2>
+
+  <% if (!bookings || bookings.length === 0) { %>
+    <div class="alert alert-light border text-center py-5">
+      <h4>No bookings yet</h4>
+      <p class="text-muted">Explore places and make your first reservation.</p>
+      <a href="/listings" class="btn btn-dark">Explore Listings</a>
+    </div>
+  <% } else { %>
+    <div class="row g-4">
+      <% for (let b of bookings) { %>
+        <% if (b.listing) { %>
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+              <img 
+                src="<%= b.listing.image?.url || '/images/default.jpg' %>" 
+                class="card-img-top" 
+                alt="<%= b.listing.title %>"
+                style="height: 180px; object-fit: cover;"
+              >
+              <div class="card-body">
+                <h5 class="card-title"><%= b.listing.title %></h5>
+                <p class="text-muted small mb-2"><%= b.listing.location %>, <%= b.listing.country %></p>
+                <hr class="my-2">
+                <p class="mb-1 small"><strong>Dates:</strong> <%= b.checkIn.toDateString() %> &rarr; <%= b.checkOut.toDateString() %></p>
+                <p class="mb-1 small"><strong>Duration:</strong> <%= b.totalNights %> night(s)</p>
+                <p class="mb-2 small"><strong>Total Price:</strong> ₹<%= b.totalPrice.toLocaleString("en-IN") %></p>
+                <span class="badge <%= b.status === 'confirmed' ? 'bg-success' : 'bg-secondary' %>">
+                  <%= b.status.toUpperCase() %>
+                </span>
+              </div>
+              <% if (b.status === 'confirmed' && new Date(b.checkIn) > new Date()) { %>
+                <div class="card-footer bg-white border-0 pt-0">
+                  <form action="/bookings/<%= b._id %>/cancel" method="POST">
+                    <button class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Cancel this reservation?')">
+                      Cancel Reservation
+                    </button>
+                  </form>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  <% } %>
+</div>

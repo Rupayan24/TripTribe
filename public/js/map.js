@@ -29,11 +29,14 @@ const map = new mapboxgl.Map({
   zoom: 9,
 });
 
+const popupContent = document.createElement("div");
+const popupTitle = document.createElement("h4");
+popupTitle.textContent = listing.title || "Listing";
+const popupDescription = document.createElement("p");
+popupDescription.textContent = "Exact location will be provided after booking";
+popupContent.append(popupTitle, popupDescription);
+
 new mapboxgl.Marker({ color: "red" })
   .setLngLat(coordinates)
-  .setPopup(
-    new mapboxgl.Popup({ offset: 25 }).setHTML(
-      `<h4>${listing.title || "Listing"}</h4><p>Exact location will be provided after booking</p>`,
-    ),
-  )
+  .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(popupContent))
   .addTo(map);

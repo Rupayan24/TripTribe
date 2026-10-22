@@ -48,25 +48,32 @@ module.exports.showListing = async (req, res, next) => {
 
 
 module.exports.createListing = async (req, res, next) => {
+  if (!mapToken) {
+    throw new Error("MAP_TOKEN is required to locate a new listing.");
+  }
+
   let response = await geocodingClient
     .forwardGeocode({
       query: req.body.listing.location,
       limit: 1, // -> gives only one coordinate of Goa... Not multiple
     })
     .send();
-    
-  
-  
-  let url = req.file.path;
-  let filename = req.file.filename;
+
+  const feature = response.body.features[0];
+  if (!feature) {
+    req.flash("error", "We couldn't find that location. Please try a nearby city or region.");
+    return res.redirect("/listings/new");
+  }
+
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
-  newListing.image = { url, filename };
+  if (req.file) {
+    newListing.image = { url: req.file.path, filename: req.file.filename };
+  }
 
-  newListing.geometry = response.body.features[0].geometry;
+  newListing.geometry = feature.geometry;
 
-  let savedListing = await newListing.save();
-  console.log(savedListing);
+  await newListing.save();
   req.flash("success", "New Listing Created!");
   res.redirect("/listings");
 };
@@ -88,7 +95,32 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
 
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  let geometry;
+  if (req.body.listing.location !== undefined) {
+    if (!mapToken) {
+      throw new Error("MAP_TOKEN is required to update a listing location.");
+    }
+
+    const response = await geocodingClient
+      .forwardGeocode({ query: req.body.listing.location, limit: 1 })
+      .send();
+    const feature = response.body.features[0];
+    if (!feature) {
+      req.flash("error", "We couldn't find that location. Please try a nearby city or region.");
+      return res.redirect(`/listings/${id}/edit`);
+    }
+    geometry = feature.geometry;
+  }
+
+  let listing = await Listing.findByIdAndUpdate(
+    id,
+    { ...req.body.listing, ...(geometry && { geometry }) },
+    { new: true, runValidators: true },
+  );
+  if (!listing) {
+    req.flash("error", "Listing you requested for does not exist!");
+    return res.redirect("/listings");
+  }
 
   if (typeof req.file !== "undefined") {
     let url = req.file.path;
@@ -104,8 +136,7 @@ module.exports.updateListing = async (req, res) => {
 
 module.exports.destroyListing = async (req, res) => {
   let { id } = req.params;
-  let deletedListing = await Listing.findByIdAndDelete(id);
-  console.log(deletedListing);
+  await Listing.findByIdAndDelete(id);
   req.flash("success", "Listing Deleted!");
   res.redirect("/listings");
 };
