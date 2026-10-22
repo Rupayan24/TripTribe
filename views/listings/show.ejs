@@ -3,9 +3,11 @@
 <% const user = (typeof currUser !== "undefined") ? currUser : null; %>
 <% const currentListing = (typeof listing !== "undefined" && listing) ? listing : {}; %>
 <% const reviews = Array.isArray(currentListing.reviews) ? currentListing.reviews : []; %>
+<% const bookedPeriods = Array.isArray(unavailablePeriods) ? unavailablePeriods : []; %>
 
 <script id="listing-data" type="application/json"><%- JSON.stringify({
   listing: currentListing,
+  unavailablePeriods: bookedPeriods,
   mapToken: (typeof process !== "undefined" && process.env.MAP_TOKEN) || "",
 }).replace(/</g, "\\u003c") %></script>
 <script>
@@ -67,6 +69,20 @@
             <p>Choose your dates to plan your getaway.</p>
           </div>
         </div>
+        <% if (bookedPeriods.length > 0) { %>
+          <details class="reservation-booked-dates">
+            <summary>Unavailable dates (<%= bookedPeriods.length %>)</summary>
+            <ul>
+              <% for (const period of bookedPeriods) { %>
+                <li>
+                  <%= new Date(`${period.checkIn}T00:00:00Z`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) %>
+                  –
+                  <%= new Date(`${period.checkOut}T00:00:00Z`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) %>
+                </li>
+              <% } %>
+            </ul>
+          </details>
+        <% } %>
         <% if (!user) { %>
           <a href="/login" class="btn btn-dark w-100 reservation-button">Log in to book dates</a>
         <% } else if (currentListing.owner && String(currentListing.owner._id || currentListing.owner) === String(user._id)) { %>
@@ -83,6 +99,7 @@
               <input type="date" class="form-control" id="checkOut" name="checkOut" required>
               <div class="invalid-feedback">Choose a check-out date after check-in.</div>
             </div>
+            <p id="reservation-availability" class="reservation-availability" role="status" hidden></p>
             <p id="reservation-estimate" class="reservation-estimate" aria-live="polite" hidden></p>
             <button type="submit" class="btn btn-dark w-100 reservation-button">
               Confirm booking <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
@@ -176,13 +193,16 @@
 
 <script>
   (() => {
+    const pageData = JSON.parse(document.getElementById("listing-data").textContent);
     const form = document.getElementById("reservation-form");
     if (!form) return;
 
     const checkIn = document.getElementById("checkIn");
     const checkOut = document.getElementById("checkOut");
     const estimate = document.getElementById("reservation-estimate");
+    const availabilityMessage = document.getElementById("reservation-availability");
     const nightlyPrice = Number(form.dataset.nightlyPrice) || 0;
+    const unavailablePeriods = pageData.unavailablePeriods || [];
 
     const formatDate = (date) => {
       const year = date.getFullYear();
@@ -196,6 +216,9 @@
     checkIn.min = formatDate(today);
 
     const updateEstimate = () => {
+      checkOut.setCustomValidity("");
+      availabilityMessage.hidden = true;
+
       if (!checkIn.value) {
         checkOut.min = formatDate(new Date(today.getTime() + 86400000));
         estimate.hidden = true;
@@ -215,6 +238,18 @@
         return;
       }
 
+      const conflict = unavailablePeriods.find(
+        (period) => checkIn.value < period.checkOut && checkOut.value > period.checkIn,
+      );
+      if (conflict) {
+        const message = "These dates overlap an existing reservation. Please choose another date range.";
+        checkOut.setCustomValidity(message);
+        availabilityMessage.textContent = message;
+        availabilityMessage.hidden = false;
+        estimate.hidden = true;
+        return;
+      }
+
       const nights = (Date.parse(`${checkOut.value}T00:00:00Z`) - Date.parse(`${checkIn.value}T00:00:00Z`)) / 86400000;
       estimate.textContent = `${nights} night${nights === 1 ? "" : "s"} · ₹${(nights * nightlyPrice).toLocaleString("en-IN")} total`;
       estimate.hidden = false;
@@ -222,6 +257,13 @@
 
     checkIn.addEventListener("change", updateEstimate);
     checkOut.addEventListener("change", updateEstimate);
+    form.addEventListener("submit", (event) => {
+      updateEstimate();
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        form.reportValidity();
+      }
+    });
     updateEstimate();
   })();
 </script>

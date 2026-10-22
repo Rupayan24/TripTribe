@@ -520,6 +520,32 @@ h5 {
   gap: 0.9rem;
 }
 
+.reservation-booked-dates {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.reservation-booked-dates summary {
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.reservation-booked-dates ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.6rem 0 0;
+  padding-left: 1.15rem;
+}
+
+.reservation-availability {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .reservation-field label {
   display: block;
   margin-bottom: 0.4rem;

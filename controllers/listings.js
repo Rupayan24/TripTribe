@@ -1,4 +1,5 @@
 const Listing = require("../models/listing");
+const Booking = require("../models/booking");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
@@ -37,13 +38,28 @@ module.exports.showListing = async (req, res, next) => {
     return res.redirect("/listings");
   }
 
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const bookedPeriods = await Booking.find({
+    listing: listing._id,
+    status: "confirmed",
+    checkOut: { $gt: today },
+  })
+    .select("checkIn checkOut -_id")
+    .sort({ checkIn: 1 })
+    .lean();
+  const unavailablePeriods = bookedPeriods.map(({ checkIn, checkOut }) => ({
+    checkIn: checkIn.toISOString().slice(0, 10),
+    checkOut: checkOut.toISOString().slice(0, 10),
+  }));
+
   let weather = null;
   if (listing.geometry && listing.geometry.coordinates?.length === 2) {
     const [lng, lat] = listing.geometry.coordinates;
     weather = await getListingWeather(lng, lat);
   }
   
-  res.render("listings/show.ejs", { listing, weather });
+  res.render("listings/show.ejs", { listing, weather, unavailablePeriods });
 };
 
 
